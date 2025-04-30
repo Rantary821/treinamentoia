@@ -6,6 +6,10 @@ from carro_ia import CarroIA, CHECKPOINTS
 from genetica import Populacao
 from renderizador import CHECKPOINTS_GRID, TILE_SIZE
 
+import time
+font = pygame.font.SysFont("Arial", 24)
+tempo_inicio = time.time()
+
 # Inicializações
 pygame.init()
 screen = pygame.display.set_mode((r.WIDTH, r.HEIGHT))
@@ -94,6 +98,14 @@ while rodando:
             cy = lin * TILE_SIZE + TILE_SIZE // 2
             pygame.draw.circle(screen, (0, 200, 255), (cx - camera_offset_x, cy - camera_offset_y), 10)
             pygame.draw.circle(screen, (0, 255, 0), (cx - camera_offset_x, cy - camera_offset_y), 50, 1)
+            # Tempo decorrido
+            tempo_segundos = int(time.time() - tempo_inicio)
+
+            # Desenha HUD com geração e tempo
+            texto1 = font.render(f"Geração: {pop.geracao}", True, (255, 255, 255))
+            texto2 = font.render(f"Tempo: {tempo_segundos}s", True, (255, 255, 0))
+            screen.blit(texto1, (20, 70))
+            screen.blit(texto2, (20, 100))
     pygame.display.flip()
 
 

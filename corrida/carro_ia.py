@@ -94,6 +94,14 @@ class CarroIA(Carro):
         if self.checkpoint_index >= len(CHECKPOINTS):
             return
 
+        # Verificação se está tentando voltar para checkpoint anterior
+        if self.checkpoint_index > 1:
+            cx_ant, cy_ant = CHECKPOINTS[self.checkpoint_index - 2]
+            dist_volta = math.hypot(self.x - cx_ant, self.y - cy_ant)
+            if dist_volta < 50:
+                self.vivo = False
+                self.individuo.fitness *= 0.1  # penalidade se ele voltar o checkpoint
+                return
         cx, cy = CHECKPOINTS[self.checkpoint_index]
         dist = math.hypot(self.x - cx, self.y - cy)
 
