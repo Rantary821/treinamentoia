@@ -37,7 +37,6 @@ while rodando:
     matriz_logica = r.gerar_matriz_logica(pista)
 
     if usar_carro_manual:
-        # Atualiza carro manual
         keys = pygame.key.get_pressed()
         carro_manual.atualizar(keys)
         if carro_manual.verificar_colisao(matriz_logica):
@@ -59,20 +58,26 @@ while rodando:
 
     else:
         vivos = 0
+        if carros:
+            camera_offset_x = int(carros[0].x - r.WIDTH // 2)
+            camera_offset_y = int(carros[0].y - r.HEIGHT // 2)
+        else:
+            camera_offset_x = 0
+            camera_offset_y = 0
+
+        r.desenhar_pista(pista, camera_offset_x, camera_offset_y)
+
         for carro in carros:
             if carro.vivo:
                 carro.atualizar_com_ia(matriz_logica)
                 carro.verificar_estado(matriz_logica)
                 vivos += 1
 
-            offset_x = int(carro.x - r.WIDTH // 2)
-            offset_y = int(carro.y - r.HEIGHT // 2)
-            r.desenhar_pista(pista, offset_x, offset_y)
-            carro.desenhar(screen, offset_x, offset_y)
+            carro.desenhar(screen, camera_offset_x, camera_offset_y)
 
             for origem, destino in carro.calcular_sensores(matriz_logica):
-                origem_tela = (origem[0] - offset_x, origem[1] - offset_y)
-                destino_tela = (destino[0] - offset_x, destino[1] - offset_y)
+                origem_tela = (origem[0] - camera_offset_x, origem[1] - camera_offset_y)
+                destino_tela = (destino[0] - camera_offset_x, destino[1] - camera_offset_y)
                 pygame.draw.line(screen, (255, 0, 0), origem_tela, destino_tela, 1)
                 pygame.draw.circle(screen, (255, 255, 0), destino_tela, 2)
 
