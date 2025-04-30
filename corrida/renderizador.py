@@ -2,9 +2,7 @@ import pygame
 import math
 
 TILE_SIZE = 100
-GRID_WIDTH = 12
-GRID_HEIGHT = 8
-WIDTH, HEIGHT = GRID_WIDTH * TILE_SIZE, GRID_HEIGHT * TILE_SIZE
+WIDTH, HEIGHT = 1280, 720
 
 # Define manualmente duas pistas como matrizes
 PISTA_1 = [
@@ -19,15 +17,8 @@ PISTA_1 = [
 ]
 
 PISTA_2 = [
-    ["direitabaixo.png", "left.png", "left.png", "left.png", "left.png", "left.png", "left.png", "left.png", "left.png", "left.png", "left.png", "esquerdabaixo.png"],
-    ["up.png", "up.png", "up.png", "up.png", "up.png", "up.png", "up.png", "up.png", "up.png", "up.png", "up.png", "up.png"],
-    ["cimadireita.png", "left.png", "cimaesquerda.png", "cimadireita.png", "left.png", "cimaesquerda.png", "cimadireita.png", "left.png", "cimaesquerda.png", "cimadireita.png", "left.png", "cimaesquerda.png"],
-    ["up.png", "up.png", "direitabaixo.png", "up.png", "up.png", "direitabaixo.png", "up.png", "up.png", "direitabaixo.png", "up.png", "up.png", "up.png"],
-    ["up.png", "up.png", "cimadireita.png", "left.png", "left.png", "cimaesquerda.png", "cimadireita.png", "left.png", "left.png", "cimaesquerda.png", "up.png", "up.png"],
-    ["up.png", "up.png", "up.png", "up.png", "up.png", "up.png", "up.png", "up.png", "up.png", "up.png", "up.png", "up.png"],
-    ["up.png", "up.png", "up.png", "up.png", "up.png", "up.png", "up.png", "up.png", "up.png", "up.png", "up.png", "up.png"],
-    ["cimadireita.png", "left.png", "left.png", "left.png", "left.png", "left.png", "left.png", "left.png", "left.png", "left.png", "left.png", "cimaesquerda.png"],
-]
+    ["direitabaixo.png", "left.png", "left.png", "left.png", "left.png", "left.png", "left.png", "left.png", "left.png", "left.png", "left.png", "esquerdabaixo.png"] * 3
+] * 20
 
 # Inicializa pygame
 pygame.init()
@@ -38,19 +29,26 @@ clock = pygame.time.Clock()
 # Cache de imagens
 tile_images = {}
 carro_img_original = pygame.image.load("assets/audi.png")
-carro_img = pygame.transform.scale(carro_img_original, (TILE_SIZE, TILE_SIZE))
+carro_img = pygame.transform.scale(carro_img_original, (TILE_SIZE // 2, TILE_SIZE // 2))
 
 # Carro com movimento real
 carro_x = 100.0
 carro_y = 100.0
 carro_vel = 0.0
 carro_angle = 0.0
-aceleracao = 0.3
-vel_max = 4.5
+aceleracao = 0.4
+vel_max = 6.5
 vel_giro = 3.0
+
+camera_offset_x = 0
+camera_offset_y = 0
 
 pistas = [PISTA_1, PISTA_2]
 pista_atual = 0
+
+# Gera matriz lógica da pista (1 = pista, 0 = fora)
+def gerar_matriz_logica(pista):
+    return [[1 if cell else 0 for cell in row] for row in pista]
 
 def carregar_tile(nome):
     if nome not in tile_images:
@@ -63,20 +61,28 @@ def carregar_tile(nome):
             tile_images[nome] = erro
     return tile_images[nome]
 
-def desenhar_pista(matriz):
+def desenhar_pista(matriz, offset_x, offset_y):
     for y, linha in enumerate(matriz):
         for x, nome_tile in enumerate(linha):
             if nome_tile:
                 imagem = carregar_tile(nome_tile)
-                screen.blit(imagem, (x * TILE_SIZE, y * TILE_SIZE))
+                screen.blit(imagem, (x * TILE_SIZE - offset_x, y * TILE_SIZE - offset_y))
+
+def verificar_colisao(matriz_logica, carro_x, carro_y):
+    col = int(carro_x // TILE_SIZE)
+    lin = int(carro_y // TILE_SIZE)
+    if 0 <= lin < len(matriz_logica) and 0 <= col < len(matriz_logica[0]):
+        return matriz_logica[lin][col] == 0
+    return True  # fora da pista = colisão
 
 rodando = True
+
 while rodando:
     dt = clock.tick(60) / 1000.0
     screen.fill((30, 30, 30))
 
     pista = pistas[pista_atual]
-    desenhar_pista(pista)
+    matriz_logica = gerar_matriz_logica(pista)
 
     # Movimento do carro
     keys = pygame.key.get_pressed()
@@ -92,11 +98,23 @@ while rodando:
         carro_vel *= 0.95
 
     rad = math.radians(carro_angle)
-    carro_x += -carro_vel * math.sin(rad)
-    carro_y += -carro_vel * math.cos(rad)
+    proximo_x = carro_x + (-carro_vel * math.sin(rad))
+    proximo_y = carro_y + (-carro_vel * math.cos(rad))
+
+    if verificar_colisao(matriz_logica, proximo_x, proximo_y):
+        carro_vel *= -0.3  # bate e quica
+    else:
+        carro_x = proximo_x
+        carro_y = proximo_y
+
+    # Atualiza câmera para seguir o carro
+    camera_offset_x = int(carro_x - WIDTH // 2)
+    camera_offset_y = int(carro_y - HEIGHT // 2)
+
+    desenhar_pista(pista, camera_offset_x, camera_offset_y)
 
     carro_rot = pygame.transform.rotate(carro_img, carro_angle)
-    rect = carro_rot.get_rect(center=(carro_x, carro_y))
+    rect = carro_rot.get_rect(center=(carro_x - camera_offset_x, carro_y - camera_offset_y))
     screen.blit(carro_rot, rect.topleft)
 
     pygame.display.flip()
