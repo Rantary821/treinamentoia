@@ -5,8 +5,8 @@ from carro import Carro
 from carro_ia import CarroIA, CHECKPOINTS
 from genetica import Populacao
 from renderizador import CHECKPOINTS_GRID, TILE_SIZE
-import matplotlib.pyplot as plt
-import matplotlib.animation as animation
+#import matplotlib.pyplot as plt
+#import matplotlib.animation as animation
 
 import time
 font = pygame.font.SysFont("Arial", 24)
@@ -143,24 +143,24 @@ while rodando:
     pygame.display.flip()
 
     
-    fig, ax = plt.subplots()
-    linha_melhor, = ax.plot([], [], label="Melhor")
-    linha_media, = ax.plot([], [], label="Média")
-    ax.set_title("Desempenho por Geração")
-    ax.set_xlabel("Geração")
-    ax.set_ylabel("Fitness")
-    ax.legend()
+    #fig, ax = plt.subplots()
+    #linha_melhor, = ax.plot([], [], label="Melhor")
+    #linha_media, = ax.plot([], [], label="Média")
+    #ax.set_title("Desempenho por Geração")
+    #ax.set_xlabel("Geração")
+    #ax.set_ylabel("Fitness")
+    #ax.legend()
 
-    def atualizar_grafico(frame):
-        linha_melhor.set_data(range(len(historico_melhor)), historico_melhor)
-        linha_media.set_data(range(len(historico_media)), historico_media)
-        ax.relim()
-        ax.autoscale_view()
-        return linha_melhor, linha_media
-    
+    #def atualizar_grafico(frame):
+    #    linha_melhor.set_data(range(len(historico_melhor)), historico_melhor)
+    #    linha_media.set_data(range(len(historico_media)), historico_media)
+    #    ax.relim()
+    #    ax.autoscale_view()
+    #    return linha_melhor, linha_media
+    #
 
-    ani = animation.FuncAnimation(fig, atualizar_grafico, interval=1000)
-    plt.show(block=False)
+    #ani = animation.FuncAnimation(fig, atualizar_grafico, interval=1000)
+    #plt.show(block=False)
 
 
     for event in pygame.event.get():

@@ -35,12 +35,14 @@ class Carro:
         self.x += dx
         self.y += dy
 
-    def verificar_colisao(self, matriz_logica):
-        col = int(self.x // r.TILE_SIZE)
-        lin = int(self.y // r.TILE_SIZE)
-        if 0 <= lin < len(matriz_logica) and 0 <= col < len(matriz_logica[0]):
-            return matriz_logica[lin][col] == 0
-        return True
+    def verificar_colisao(self, surface_colisao):
+        x_int = int(self.x)
+        y_int = int(self.y)
+    
+        if 0 <= x_int < surface_colisao.get_width() and 0 <= y_int < surface_colisao.get_height():
+            cor = surface_colisao.get_at((x_int, y_int))[:3]  # Pega RGB
+            return cor == (0, 0, 0)  # Colide se for preto
+        return True  # Fora dos limites = colisão
 
     def desenhar(self, screen, offset_x, offset_y):
         rot = pygame.transform.rotate(self.img, self.angle)

@@ -1,7 +1,7 @@
 import pygame
 import math
 
-TILE_SIZE = 100
+TILE_SIZE = 80
 WIDTH, HEIGHT = 1280, 720
 
 # Define manualmente duas pistas como matrizes
@@ -15,10 +15,16 @@ PISTA_1 = [
     [None, "up.png", None, None, None, "up.png", None, None, None, None, None, None],
     [None, "cimadireita.png", "left.png", "left.png", "left.png", "cimaesquerda.png", None, None, None, None, None, None],
 ]
-
 PISTA_2 = [
-    ["direitabaixo.png", "left.png", "left.png", "left.png", "left.png", "left.png", "left.png", "left.png", "left.png", "left.png", "left.png", "esquerdabaixo.png"] * 3
-] * 20
+    ["direitabaixo.png", "left.png", "left.png", "left.png", "left.png", "left.png", "left.png", "left.png", "left.png", "left.png", "left.png", "esquerdabaixo.png"],
+    ["up.png", None, None, None, None, None, "direitabaixo.png", "esquerdabaixo.png", None, None, None, "up.png"],
+    ["up.png", None, "direitabaixo.png", "esquerdabaixo.png", None, None, "up.png", "cimadireita.png", "left.png", "left.png", "left.png", "cimaesquerda.png"],
+    ["cimadireita.png", "esquerdabaixo.png", "up.png", "up.png", None, None, "up.png", None, "direitabaixo.png", "left.png", "left.png", "esquerdabaixo.png"],
+    [None, "cimadireita.png", "cimaesquerda.png", "up.png", None, None, "up.png", None, "up.png", None, None, "up.png"],
+    ["direitabaixo.png", "left.png.", "left.png", "cimaesquerda.png", None, None, "up.png", None, "up.png", None, None, "up.png"],
+    ["up.png", None, None, None, None, None, "cimadireita.png", "left.png", "cimaesquerda.png", None, None, "up.png"],
+    ["cimadireita.png", "left.png", "left.png", "left.png", "left.png", "left.png", "left.png", "left.png", "left.png", "left.png", "left.png", "cimaesquerda.png"],
+]
 
 # Inicializa pygame
 pygame.init()
