@@ -79,7 +79,7 @@ def verificar_colisao(matriz_logica, carro_x, carro_y):
 CHECKPOINTS_GRID = [
     #(1, 0),  # início da reta
     (3, 0),  # fim da reta horizontal
-    (5, 4),  # meio da descida
+    (4, 4),  # meio da descida
     (5, 6),  # fim da descida
     (4, 7),  # curva para a direita
     (2, 7),  # fim da reta à direita

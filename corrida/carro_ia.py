@@ -2,14 +2,15 @@ from carro import Carro
 import math
 import pygame
 
-# Checkpoints baseados na PISTA_1 (em ordem, no formato COLUNA, LINHA)
 CHECKPOINTS_GRID = [
     #(1, 0),  # início da reta
     (3, 0),  # fim da reta horizontal
-    (3, 4),  # meio da descida
-    (4, 4),  # fim da descida
-    (4, 4),  # curva para a direita
-    (5, 6),  # fim da reta à direita
+    (4, 4),  # meio da descida
+    (5, 6),  # fim da descida
+    (4, 7),  # curva para a direita
+    (2, 7),  # fim da reta à direita
+    (1, 5),  # fim da reta à direita
+    (0, 2),  # fim da reta à direita
 ]
 
 TILE_SIZE = 100
@@ -40,10 +41,10 @@ class CarroIA(Carro):
         self.frames_desde_ultimo_checkpoint += 1
 
         # Penaliza se passar muito tempo sem alcançar checkpoint
-        if self.frames_desde_ultimo_checkpoint > 300:  # por exemplo: 5 segundos sem progresso
-            self.vivo = False
-            self.atualizar_fitness()
-            return
+        #if self.frames_desde_ultimo_checkpoint > 300:  # por exemplo: 5 segundos sem progresso
+         #   self.vivo = False
+          #  self.atualizar_fitness()
+           # return
 
         sensores = self.calcular_sensores(matriz_logica)
 
@@ -107,15 +108,13 @@ class CarroIA(Carro):
 
         # Verifica se está perto de qualquer checkpoint "futuro" sem ter feito os anteriores
         if self.checkpoint_index == 0:
-            for i in range(1, len(CHECKPOINTS)):
-                cx_i, cy_i = CHECKPOINTS[i]
-                dist_i = math.hypot(self.x - cx_i, self.y - cy_i)
-                if dist_i < 50:
-                    # Penalização severa
-                    self.vivo = False
-                    self.individuo.fitness = 0
-                    
-                    return
+            # Só verifica se ele está tentando ir direto para o último checkpoint
+            cx_ultimo, cy_ultimo = CHECKPOINTS[-1]
+            dist_ultimo = math.hypot(self.x - cx_ultimo, self.y - cy_ultimo)
+            if dist_ultimo < 50:
+                self.vivo = False
+                self.individuo.fitness = 0
+                return
 
         if dist < 50:
             self.checkpoints_atingidos += 1
@@ -129,7 +128,7 @@ class CarroIA(Carro):
             self.atualizar_fitness()
 
     def atualizar_fitness(self):
-        bonus_checkpoints = sum((i + 1) * 600 for i in range(self.checkpoints_atingidos))
+        bonus_checkpoints = sum((i + 1) * 1000 for i in range(self.checkpoints_atingidos))
 
         self.individuo.fitness = (
             bonus_checkpoints +
@@ -137,4 +136,4 @@ class CarroIA(Carro):
             self.tempo_vivo * 0.2
         )
         if self.morreu_por_colisao:
-            self.individuo.fitness *= 0.4  # penaliza fortemente (ou até 0)
+            self.individuo.fitness *= 0.9  # penaliza fortemente (ou até 0)

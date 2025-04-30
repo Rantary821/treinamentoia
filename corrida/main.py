@@ -17,9 +17,11 @@ clock = pygame.time.Clock()
 
 # Estado do jogo
 pista_atual = 0
-pop = Populacao(tamanho=30)
-carros = [CarroIA(100, 100, ind) for ind in pop.individuos]
-carro_manual = Carro(100, 100)
+pop = Populacao(tamanho=90)
+carros = [CarroIA(50, 50, ind) for ind in pop.individuos]
+for carro in carros:
+    carro.angle = -90  # apontando para a direita, por exemplo
+carro_manual = Carro(50, 50)
 usar_carro_manual = False
 
 font = pygame.font.SysFont(None, 30)
@@ -32,7 +34,16 @@ def desenhar_botao():
     txt = font.render(texto, True, (255,255,255))
     screen.blit(txt, (20, 20))
     return rect
-
+def desenhar_botao_reiniciar():
+    largura = 160
+    altura = 40
+    margem = 20
+    rect = pygame.Rect(r.WIDTH - largura - margem, margem, largura, altura)
+    pygame.draw.rect(screen, (200, 50, 50), rect)
+    pygame.draw.rect(screen, (255, 255, 255), rect, 2)
+    txt = font.render("REINICIAR", True, (255, 255, 255))
+    screen.blit(txt, (rect.x + 20, rect.y + 10))
+    return rect
 rodando = True
 while rodando:
     dt = clock.tick(60) / 1000.0
@@ -52,6 +63,9 @@ while rodando:
 
         r.desenhar_pista(pista, camera_offset_x, camera_offset_y)
         carro_manual.desenhar(screen, camera_offset_x, camera_offset_y)
+
+        botao_rect = desenhar_botao()
+        botao_reiniciar_rect = desenhar_botao_reiniciar()
 
         for origem, destino in carro_manual.calcular_sensores(matriz_logica):
             origem_tela = (origem[0] - camera_offset_x, origem[1] - camera_offset_y)
@@ -88,7 +102,9 @@ while rodando:
 
         if vivos == 0:
             pop.evoluir()
-            carros = [CarroIA(100, 100, ind) for ind in pop.individuos]
+            carros = [CarroIA(50, 50, ind) for ind in pop.individuos]
+            for carro in carros:
+                carro.angle = -90  # apontando para a direita, por exemplo
 
     botao_rect = desenhar_botao()
       # Desenha checkpoints (modo IA)
@@ -108,12 +124,14 @@ while rodando:
             screen.blit(texto2, (20, 100))
             total = len(pop.individuos)
             vivos = sum(1 for i in pop.individuos if hasattr(i, 'vivo') and i.vivo)
-            
+            vivos = sum(1 for c in carros if c.vivo)
             texto3 = font.render(f"População: {total}", True, (0, 200, 255))
             texto4 = font.render(f"Vivos: {vivos}", True, (0, 255, 0))
-            
+
             screen.blit(texto3, (20, 130))
             screen.blit(texto4, (20, 160))
+            botao_rect = desenhar_botao()
+            botao_reiniciar_rect = desenhar_botao_reiniciar()
     pygame.display.flip()
 
 
@@ -129,5 +147,12 @@ while rodando:
                 pista_atual = 0
             elif event.key == pygame.K_2:
                 pista_atual = 1
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            if botao_rect.collidepoint(event.pos):
+                usar_carro_manual = not usar_carro_manual
+                carro_manual = Carro(100, 100)
+            elif botao_reiniciar_rect.collidepoint(event.pos):
+                pop.evoluir()
+                carros = [CarroIA(100, 100, ind) for ind in pop.individuos]
 
 pygame.quit()

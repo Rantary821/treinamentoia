@@ -28,14 +28,15 @@ class Individuo:
             for j in range(len(self.rede.w_ih[i])):
                 if random.random() < taxa:
                     self.rede.w_ih[i][j] += random.uniform(-1, 1)
-
         for i in range(len(self.rede.w_ho)):
             for j in range(len(self.rede.w_ho[i])):
                 if random.random() < taxa:
                     self.rede.w_ho[i][j] += random.uniform(-1, 1)
 
+from copy import deepcopy
+
 class Populacao:
-    def __init__(self, tamanho=200):
+    def __init__(self, tamanho=50):
         self.geracao = 0
         self.tamanho = tamanho
 
@@ -43,7 +44,14 @@ class Populacao:
             with open("melhor_agente.pkl", "rb") as f:
                 melhor = pickle.load(f)
                 print("🔁 Melhor agente carregado com sucesso.")
-                self.individuos = [melhor] + [Individuo() for _ in range(tamanho - 1)]
+
+                # Clonar o melhor e gerar mutações dele
+                self.individuos = [melhor]
+                for _ in range(tamanho - 1):
+                    clone = deepcopy(melhor)
+                    clone.mutar(taxa=0.1)
+                    self.individuos.append(clone)
+
         except:
             print("🆕 Nenhum agente salvo encontrado, criando população nova.")
             self.individuos = [Individuo() for _ in range(tamanho)]
