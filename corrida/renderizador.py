@@ -75,3 +75,16 @@ def verificar_colisao(matriz_logica, carro_x, carro_y):
         return matriz_logica[lin][col] == 0
     return True  # fora da pista = colisão
 
+# Checkpoints definidos manualmente na ordem certa (col, lin)
+CHECKPOINTS_GRID = [
+    #(1, 0),  # início da reta
+    (3, 0),  # fim da reta horizontal
+    (3, 2),  # meio da descida
+    (3, 4),  # fim da descida
+    (5, 4),  # curva para a direita
+    (5, 6),  # fim da reta à direita
+]
+
+# Converte posições de grid para coordenadas absolutas (centro do tile)
+def gerar_checkpoints_pixel():
+    return [(x * TILE_SIZE + TILE_SIZE // 2, y * TILE_SIZE + TILE_SIZE // 2) for x, y in CHECKPOINTS_GRID]

@@ -13,17 +13,22 @@ class Carro:
         self.angulos_sensores = [i for i in range(0, 360, 360 // 16)]  # 16 sensores circulares
 
     def atualizar(self, keys):
-        if keys[pygame.K_LEFT]:
-            self.angle += r.vel_giro
-        if keys[pygame.K_RIGHT]:
-            self.angle -= r.vel_giro
+        # Atualiza aceleração
         if keys[pygame.K_UP]:
             self.velocidade = min(r.vel_max, self.velocidade + r.aceleracao)
         elif keys[pygame.K_DOWN]:
             self.velocidade = max(-r.vel_max / 2, self.velocidade - r.aceleracao)
         else:
             self.velocidade *= 0.95
-
+    
+        # Somente gira se estiver em movimento
+        if abs(self.velocidade) > 0.5:
+            if keys[pygame.K_LEFT]:
+                self.angle += r.vel_giro
+            if keys[pygame.K_RIGHT]:
+                self.angle -= r.vel_giro
+    
+        # Aplica movimento
         rad = math.radians(self.angle)
         dx = -self.velocidade * math.sin(rad)
         dy = -self.velocidade * math.cos(rad)

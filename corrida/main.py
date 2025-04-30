@@ -2,8 +2,9 @@ import pygame
 import math
 import renderizador as r
 from carro import Carro
-from carro_ia import CarroIA
+from carro_ia import CarroIA, CHECKPOINTS
 from genetica import Populacao
+from renderizador import CHECKPOINTS_GRID, TILE_SIZE
 
 # Inicializações
 pygame.init()
@@ -86,7 +87,15 @@ while rodando:
             carros = [CarroIA(100, 100, ind) for ind in pop.individuos]
 
     botao_rect = desenhar_botao()
+      # Desenha checkpoints (modo IA)
+    if not usar_carro_manual:
+        for col, lin in CHECKPOINTS_GRID:
+            cx = col * TILE_SIZE + TILE_SIZE // 2
+            cy = lin * TILE_SIZE + TILE_SIZE // 2
+            pygame.draw.circle(screen, (0, 200, 255), (cx - camera_offset_x, cy - camera_offset_y), 10)
+            pygame.draw.circle(screen, (0, 255, 0), (cx - camera_offset_x, cy - camera_offset_y), 50, 1)
     pygame.display.flip()
+
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
