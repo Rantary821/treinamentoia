@@ -78,7 +78,7 @@ class CarroIA(Carro):
 
         # Penaliza movimento mínimo (ex: girar no mesmo lugar)
         movimento = math.hypot(self.x - self.ultimo_x, self.y - self.ultimo_y)
-        if movimento < 1:
+        if movimento < 4:
             self.sem_movimento_frames += 1
         else:
             self.sem_movimento_frames = 0

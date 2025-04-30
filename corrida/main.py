@@ -20,7 +20,7 @@ clock = pygame.time.Clock()
 # Estado do jogo
 pista_atual = 0
 surface_colisao = r.gerar_surface_mapa(r.pistas[pista_atual])
-pop = Populacao(tamanho=20)
+pop = Populacao(tamanho=50)
 carros = [CarroIA(50, 50, ind) for ind in pop.individuos]
 for carro in carros:
     carro.angle = -90  # apontando para a direita, por exemplo
@@ -84,8 +84,10 @@ while rodando:
     else:
         vivos = 0
         if carros:
-            camera_offset_x = int(carros[0].x - r.WIDTH // 2)
-            camera_offset_y = int(carros[0].y - r.HEIGHT // 2)
+            map_width = len(r.pistas[r.pista_atual][0]) * r.TILE_SIZE
+            map_height = len(r.pistas[r.pista_atual]) * r.TILE_SIZE
+            camera_offset_x = map_width // 2 - r.WIDTH // 2
+            camera_offset_y = map_height // 2 - r.HEIGHT // 2
         else:
             camera_offset_x = 0
             camera_offset_y = 0
