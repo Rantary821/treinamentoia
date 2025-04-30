@@ -35,7 +35,7 @@ class Individuo:
                     self.rede.w_ho[i][j] += random.uniform(-1, 1)
 
 class Populacao:
-    def __init__(self, tamanho=50):
+    def __init__(self, tamanho=200):
         self.geracao = 0
         self.tamanho = tamanho
 

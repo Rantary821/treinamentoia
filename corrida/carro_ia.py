@@ -100,7 +100,7 @@ class CarroIA(Carro):
             dist_volta = math.hypot(self.x - cx_ant, self.y - cy_ant)
             if dist_volta < 50:
                 self.vivo = False
-                self.individuo.fitness *= 0.1  # penalidade se ele voltar o checkpoint
+                self.individuo.fitness *= 0  # penalidade se ele voltar o checkpoint
                 return
         cx, cy = CHECKPOINTS[self.checkpoint_index]
         dist = math.hypot(self.x - cx, self.y - cy)

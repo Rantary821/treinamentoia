@@ -106,6 +106,14 @@ while rodando:
             texto2 = font.render(f"Tempo: {tempo_segundos}s", True, (255, 255, 0))
             screen.blit(texto1, (20, 70))
             screen.blit(texto2, (20, 100))
+            total = len(pop.individuos)
+            vivos = sum(1 for i in pop.individuos if hasattr(i, 'vivo') and i.vivo)
+            
+            texto3 = font.render(f"População: {total}", True, (0, 200, 255))
+            texto4 = font.render(f"Vivos: {vivos}", True, (0, 255, 0))
+            
+            screen.blit(texto3, (20, 130))
+            screen.blit(texto4, (20, 160))
     pygame.display.flip()
 
 
