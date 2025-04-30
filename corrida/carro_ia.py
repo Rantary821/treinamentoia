@@ -121,8 +121,8 @@ class CarroIA(Carro):
             self.checkpoint_index += 1
             self.frames_desde_ultimo_checkpoint = 0  # resetar o contador
 
-    def verificar_estado(self, matriz_logica):
-        if self.verificar_colisao(matriz_logica):
+    def verificar_estado(self, surface_colisao):
+        if self.verificar_colisao(surface_colisao):
             self.vivo = False
             self.morreu_por_colisao = True
             self.atualizar_fitness()

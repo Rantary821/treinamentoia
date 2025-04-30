@@ -15,6 +15,7 @@ PISTA_1 = [
     [None, "up.png", None, None, None, "up.png", None, None, None, None, None, None],
     [None, "cimadireita.png", "left.png", "left.png", "left.png", "cimaesquerda.png", None, None, None, None, None, None],
 ]
+
 PISTA_2 = [
     ["direitabaixo.png", "left.png", "left.png", "left.png", "left.png", "left.png", "left.png", "left.png", "left.png", "left.png", "left.png", "esquerdabaixo.png"],
     ["up.png", None, None, None, None, None, "direitabaixo.png", "esquerdabaixo.png", None, None, None, "up.png"],
@@ -26,35 +27,27 @@ PISTA_2 = [
     ["cimadireita.png", "left.png", "left.png", "left.png", "left.png", "left.png", "left.png", "left.png", "left.png", "left.png", "left.png", "cimaesquerda.png"],
 ]
 
-# Inicializa pygame
+pistas = [PISTA_1, PISTA_2]
+pista_atual = 0
+
+# Inicializações
 pygame.init()
 screen = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.display.set_caption("Visualizador de Pistas")
 clock = pygame.time.Clock()
 
-# Cache de imagens
+# Parâmetros do carro
+aceleracao = 0.4
+vel_max = 10.5
+vel_giro = 2.0
+
+# Imagens e cache
 tile_images = {}
 carro_img_original = pygame.image.load("assets/audi.png")
 carro_img = pygame.transform.scale(carro_img_original, (TILE_SIZE // 2, TILE_SIZE // 2))
 
-# Carro com movimento real
-carro_x = 100.0
-carro_y = 100.0
-carro_vel = 0.0
-carro_angle = 0.0
-aceleracao = 0.4
-vel_max = 6.5
-vel_giro = 3.0
-
-camera_offset_x = 0
-camera_offset_y = 0
-
-pistas = [PISTA_1, PISTA_2]
-pista_atual = 0
-
-# Gera matriz lógica da pista (1 = pista, 0 = fora)
-def gerar_matriz_logica(pista):
-    return [[1 if cell else 0 for cell in row] for row in pista]
+# Surface usada para colisão
+colisao_surface = None
 
 def carregar_tile(nome):
     if nome not in tile_images:
@@ -67,32 +60,41 @@ def carregar_tile(nome):
             tile_images[nome] = erro
     return tile_images[nome]
 
-def desenhar_pista(matriz, offset_x, offset_y):
-    for y, linha in enumerate(matriz):
-        for x, nome_tile in enumerate(linha):
-            if nome_tile:
-                imagem = carregar_tile(nome_tile)
-                screen.blit(imagem, (x * TILE_SIZE - offset_x, y * TILE_SIZE - offset_y))
+def gerar_surface_mapa(pista):
+    largura = len(pista[0]) * TILE_SIZE
+    altura = len(pista) * TILE_SIZE
+    mapa = pygame.Surface((largura, altura))
+    mapa.fill((0, 0, 0))
+    for y, linha in enumerate(pista):
+        for x, tile in enumerate(linha):
+            if tile:
+                imagem = carregar_tile(tile)
+                mapa.blit(imagem, (x * TILE_SIZE, y * TILE_SIZE))
+    return mapa
 
-def verificar_colisao(matriz_logica, carro_x, carro_y):
-    col = int(carro_x // TILE_SIZE)
-    lin = int(carro_y // TILE_SIZE)
-    if 0 <= lin < len(matriz_logica) and 0 <= col < len(matriz_logica[0]):
-        return matriz_logica[lin][col] == 0
-    return True  # fora da pista = colisão
+def desenhar_pista(pista, offset_x, offset_y):
+    global colisao_surface
+    if colisao_surface:
+        screen.blit(colisao_surface, (-offset_x, -offset_y))
 
-# Checkpoints definidos manualmente na ordem certa (col, lin)
+def atualizar_surface_colisao(indice_pista):
+    global pista_atual, colisao_surface
+    pista_atual = indice_pista
+    colisao_surface = gerar_surface_mapa(pistas[pista_atual])
+
+def get_colisao_surface():
+    return colisao_surface
+
+# Checkpoints (opcional)
 CHECKPOINTS_GRID = [
-    #(1, 0),  # início da reta
-    (3, 0),  # fim da reta horizontal
-    (4, 4),  # meio da descida
-    (5, 6),  # fim da descida
-    (4, 7),  # curva para a direita
-    (2, 7),  # fim da reta à direita
-    (1, 5),  # fim da reta à direita
-    (0, 2),  # fim da reta à direita
+    (3, 0), (4, 4), (5, 6), (4, 7), (2, 7), (1, 5), (0, 2)
 ]
 
-# Converte posições de grid para coordenadas absolutas (centro do tile)
 def gerar_checkpoints_pixel():
     return [(x * TILE_SIZE + TILE_SIZE // 2, y * TILE_SIZE + TILE_SIZE // 2) for x, y in CHECKPOINTS_GRID]
+
+# Inicializa a surface de colisão na primeira execução
+atualizar_surface_colisao(pista_atual)
+
+def gerar_matriz_logica(pista):
+    return [[1 if cell else 0 for cell in row] for row in pista]

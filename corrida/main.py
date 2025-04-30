@@ -19,7 +19,8 @@ clock = pygame.time.Clock()
 
 # Estado do jogo
 pista_atual = 0
-pop = Populacao(tamanho=90)
+surface_colisao = r.gerar_surface_mapa(r.pistas[pista_atual])
+pop = Populacao(tamanho=20)
 carros = [CarroIA(50, 50, ind) for ind in pop.individuos]
 for carro in carros:
     carro.angle = -90  # apontando para a direita, por exemplo
@@ -55,12 +56,13 @@ while rodando:
     screen.fill((30, 30, 30))
 
     pista = r.pistas[pista_atual]
-    matriz_logica = r.gerar_matriz_logica(pista)
+    surface_colisao = r.gerar_surface_mapa(pista)
+    #matriz_logica = r.gerar_matriz_logica(pista)
 
     if usar_carro_manual:
         keys = pygame.key.get_pressed()
         carro_manual.atualizar(keys)
-        if carro_manual.verificar_colisao(matriz_logica):
+        if carro_manual.verificar_colisao(surface_colisao):
             carro_manual.velocidade *= -0.3
 
         camera_offset_x = int(carro_manual.x - r.WIDTH // 2)
@@ -71,7 +73,7 @@ while rodando:
 
 
 
-        for origem, destino in carro_manual.calcular_sensores(matriz_logica):
+        for origem, destino in carro_manual.calcular_sensores(surface_colisao):
             origem_tela = (origem[0] - camera_offset_x, origem[1] - camera_offset_y)
             destino_tela = (destino[0] - camera_offset_x, destino[1] - camera_offset_y)
             distancia = math.hypot(destino[0] - origem[0], destino[1] - origem[1])
@@ -92,13 +94,13 @@ while rodando:
 
         for carro in carros:
             if carro.vivo:
-                carro.atualizar_com_ia(matriz_logica)
-                carro.verificar_estado(matriz_logica)
+                carro.atualizar_com_ia(surface_colisao)
+                carro.verificar_estado(surface_colisao)
                 vivos += 1
 
             carro.desenhar(screen, camera_offset_x, camera_offset_y)
 
-            for origem, destino in carro.calcular_sensores(matriz_logica):
+            for origem, destino in carro.calcular_sensores(surface_colisao):
                 origem_tela = (origem[0] - camera_offset_x, origem[1] - camera_offset_y)
                 destino_tela = (destino[0] - camera_offset_x, destino[1] - camera_offset_y)
                 pygame.draw.line(screen, (255, 0, 0), origem_tela, destino_tela, 1)
@@ -168,9 +170,13 @@ while rodando:
             rodando = False
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_1:
-                pista_atual = 0
+             pista_atual = 0
+             r.surface_colisao = r.gerar_surface_mapa(r.pistas[pista_atual])
+             r.matriz_logica = r.gerar_matriz_logica(r.pistas[pista_atual])
             elif event.key == pygame.K_2:
                 pista_atual = 1
+                r.surface_colisao = r.gerar_surface_mapa(r.pistas[pista_atual])
+                r.matriz_logica = r.gerar_matriz_logica(r.pistas[pista_atual])
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if botao_rect.collidepoint(event.pos):
                 usar_carro_manual = not usar_carro_manual
