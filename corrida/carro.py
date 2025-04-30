@@ -9,6 +9,8 @@ class Carro:
         self.angle = 0.0
         self.velocidade = 0.0
         self.img = pygame.transform.scale(r.carro_img_original, (r.TILE_SIZE // 2, r.TILE_SIZE // 2))
+        #Definindo sensores
+        self.angulos_sensores = [i for i in range(0, 360, 360 // 16)]  # 16 sensores circulares
 
     def atualizar(self, keys):
         if keys[pygame.K_LEFT]:
@@ -39,3 +41,21 @@ class Carro:
         rot = pygame.transform.rotate(self.img, self.angle)
         rect = rot.get_rect(center=(self.x - offset_x, self.y - offset_y))
         screen.blit(rot, rect.topleft)
+
+    def calcular_sensores(self, matriz_logica, range_max=800, step=5):
+        sensores = []
+        for ang in self.angulos_sensores:
+            total_angle = math.radians(self.angle + ang)
+            for dist in range(0, range_max, step):
+                sx = self.x + dist * math.cos(total_angle)
+                sy = self.y - dist * math.sin(total_angle)
+
+                col = int(sx // r.TILE_SIZE)
+                lin = int(sy // r.TILE_SIZE)
+                if lin < 0 or col < 0 or lin >= len(matriz_logica) or col >= len(matriz_logica[0]) or matriz_logica[lin][col] == 0:
+                    sensores.append(((self.x, self.y), (sx, sy)))
+                    break
+            else:
+                # se não colidiu, marca o fim do range
+                sensores.append(((self.x, self.y), (sx, sy)))
+        return sensores

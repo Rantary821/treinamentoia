@@ -6,7 +6,7 @@ import renderizador as r
 from carro import Carro
 
 carro = Carro(100, 100)
-pista_atual = 0  # ✅ Adiciona esta linha aqui
+pista_atual = 0  
 
 # Inicializações específicas do main
 pygame.init()
@@ -34,6 +34,20 @@ while rodando:
     r.desenhar_pista(pista, camera_offset_x, camera_offset_y)
 
     carro.desenhar(screen, camera_offset_x, camera_offset_y)
+    for origem, destino in carro.calcular_sensores(matriz_logica):
+        # Corrige para coordenadas da tela
+        origem_tela = (origem[0] - camera_offset_x, origem[1] - camera_offset_y)
+        destino_tela = (destino[0] - camera_offset_x, destino[1] - camera_offset_y)
+    
+        # Cor diferente se sensor for curto (colidiu logo)
+        distancia = math.hypot(destino[0] - origem[0], destino[1] - origem[1])
+        cor = (255, 0, 0) if distancia < 180 else (0, 255, 0)
+    
+        # Desenha o sensor (linha)
+        pygame.draw.line(screen, cor, origem_tela, destino_tela, 2)
+    
+        # Desenha ponto de colisão
+        pygame.draw.circle(screen, (255, 255, 0), destino_tela, 4)
 
     pygame.display.flip()
 
