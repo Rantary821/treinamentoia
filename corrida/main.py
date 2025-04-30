@@ -1,18 +1,32 @@
 import pygame
 import math
 import renderizador as r
-
-
 from carro import Carro
+from carro_ia import CarroIA
+from genetica import Populacao
 
-carro = Carro(100, 100)
-pista_atual = 0  
-
-# Inicializações específicas do main
+# Inicializações
 pygame.init()
 screen = pygame.display.set_mode((r.WIDTH, r.HEIGHT))
 clock = pygame.time.Clock()
 
+# Estado do jogo
+pista_atual = 0
+pop = Populacao(tamanho=30)
+carros = [CarroIA(100, 100, ind) for ind in pop.individuos]
+carro_manual = Carro(100, 100)
+usar_carro_manual = False
+
+font = pygame.font.SysFont(None, 30)
+def desenhar_botao():
+    cor = (50, 200, 50) if not usar_carro_manual else (200, 50, 50)
+    texto = "JOGAR MANUAL" if not usar_carro_manual else "SIMULAÇÃO IA"
+    rect = pygame.Rect(10, 10, 160, 40)
+    pygame.draw.rect(screen, cor, rect)
+    pygame.draw.rect(screen, (255,255,255), rect, 2)
+    txt = font.render(texto, True, (255,255,255))
+    screen.blit(txt, (20, 20))
+    return rect
 
 rodando = True
 while rodando:
@@ -22,38 +36,60 @@ while rodando:
     pista = r.pistas[pista_atual]
     matriz_logica = r.gerar_matriz_logica(pista)
 
-    # Movimento do carro
-    keys = pygame.key.get_pressed()
-    carro.atualizar(keys)
-    if carro.verificar_colisao(matriz_logica):
-        carro.velocidade *= -0.3
+    if usar_carro_manual:
+        # Atualiza carro manual
+        keys = pygame.key.get_pressed()
+        carro_manual.atualizar(keys)
+        if carro_manual.verificar_colisao(matriz_logica):
+            carro_manual.velocidade *= -0.3
 
-    camera_offset_x = int(carro.x - r.WIDTH // 2)
-    camera_offset_y = int(carro.y - r.HEIGHT // 2)
+        camera_offset_x = int(carro_manual.x - r.WIDTH // 2)
+        camera_offset_y = int(carro_manual.y - r.HEIGHT // 2)
 
-    r.desenhar_pista(pista, camera_offset_x, camera_offset_y)
+        r.desenhar_pista(pista, camera_offset_x, camera_offset_y)
+        carro_manual.desenhar(screen, camera_offset_x, camera_offset_y)
 
-    carro.desenhar(screen, camera_offset_x, camera_offset_y)
-    for origem, destino in carro.calcular_sensores(matriz_logica):
-        # Corrige para coordenadas da tela
-        origem_tela = (origem[0] - camera_offset_x, origem[1] - camera_offset_y)
-        destino_tela = (destino[0] - camera_offset_x, destino[1] - camera_offset_y)
-    
-        # Cor diferente se sensor for curto (colidiu logo)
-        distancia = math.hypot(destino[0] - origem[0], destino[1] - origem[1])
-        cor = (255, 0, 0) if distancia < 180 else (0, 255, 0)
-    
-        # Desenha o sensor (linha)
-        pygame.draw.line(screen, cor, origem_tela, destino_tela, 2)
-    
-        # Desenha ponto de colisão
-        pygame.draw.circle(screen, (255, 255, 0), destino_tela, 4)
+        for origem, destino in carro_manual.calcular_sensores(matriz_logica):
+            origem_tela = (origem[0] - camera_offset_x, origem[1] - camera_offset_y)
+            destino_tela = (destino[0] - camera_offset_x, destino[1] - camera_offset_y)
+            distancia = math.hypot(destino[0] - origem[0], destino[1] - origem[1])
+            cor = (255, 0, 0) if distancia < 180 else (0, 255, 0)
+            pygame.draw.line(screen, cor, origem_tela, destino_tela, 2)
+            pygame.draw.circle(screen, (255, 255, 0), destino_tela, 4)
 
+    else:
+        vivos = 0
+        for carro in carros:
+            if carro.vivo:
+                carro.atualizar_com_ia(matriz_logica)
+                carro.verificar_estado(matriz_logica)
+                vivos += 1
+
+            offset_x = int(carro.x - r.WIDTH // 2)
+            offset_y = int(carro.y - r.HEIGHT // 2)
+            r.desenhar_pista(pista, offset_x, offset_y)
+            carro.desenhar(screen, offset_x, offset_y)
+
+            for origem, destino in carro.calcular_sensores(matriz_logica):
+                origem_tela = (origem[0] - offset_x, origem[1] - offset_y)
+                destino_tela = (destino[0] - offset_x, destino[1] - offset_y)
+                pygame.draw.line(screen, (255, 0, 0), origem_tela, destino_tela, 1)
+                pygame.draw.circle(screen, (255, 255, 0), destino_tela, 2)
+
+        if vivos == 0:
+            pop.evoluir()
+            carros = [CarroIA(100, 100, ind) for ind in pop.individuos]
+
+    botao_rect = desenhar_botao()
     pygame.display.flip()
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             rodando = False
+        elif event.type == pygame.MOUSEBUTTONDOWN:
+            if botao_rect.collidepoint(event.pos):
+                usar_carro_manual = not usar_carro_manual
+                carro_manual = Carro(100, 100)
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_1:
                 pista_atual = 0
