@@ -4,12 +4,12 @@ import pygame
 
 # Checkpoints baseados na PISTA_1 (em ordem, no formato COLUNA, LINHA)
 CHECKPOINTS_GRID = [
-   # (0, 0),  # início
-    (3, 0),  # fim da reta
-    (3, 4),  # fim da descida
-    (5, 4),  # curva à direita
-    (5, 7),  # fundo
-    (1, 7),  # retorno
+    #(1, 0),  # início da reta
+    (3, 0),  # fim da reta horizontal
+    (3, 4),  # meio da descida
+    (4, 4),  # fim da descida
+    (4, 4),  # curva para a direita
+    (5, 6),  # fim da reta à direita
 ]
 
 TILE_SIZE = 100
@@ -97,6 +97,18 @@ class CarroIA(Carro):
         cx, cy = CHECKPOINTS[self.checkpoint_index]
         dist = math.hypot(self.x - cx, self.y - cy)
 
+        # Verifica se está perto de qualquer checkpoint "futuro" sem ter feito os anteriores
+        if self.checkpoint_index == 0:
+            for i in range(1, len(CHECKPOINTS)):
+                cx_i, cy_i = CHECKPOINTS[i]
+                dist_i = math.hypot(self.x - cx_i, self.y - cy_i)
+                if dist_i < 50:
+                    # Penalização severa
+                    self.vivo = False
+                    self.individuo.fitness = 0
+                    
+                    return
+
         if dist < 50:
             self.checkpoints_atingidos += 1
             self.checkpoint_index += 1
@@ -109,10 +121,12 @@ class CarroIA(Carro):
             self.atualizar_fitness()
 
     def atualizar_fitness(self):
+        bonus_checkpoints = sum((i + 1) * 600 for i in range(self.checkpoints_atingidos))
+
         self.individuo.fitness = (
-            self.checkpoints_atingidos * 2000 +
+            bonus_checkpoints +
             self.distancia_percorrida +
             self.tempo_vivo * 0.2
         )
         if self.morreu_por_colisao:
-            self.individuo.fitness *= 0.1  # penaliza fortemente (ou até 0)
+            self.individuo.fitness *= 0.4  # penaliza fortemente (ou até 0)

@@ -79,10 +79,12 @@ def verificar_colisao(matriz_logica, carro_x, carro_y):
 CHECKPOINTS_GRID = [
     #(1, 0),  # início da reta
     (3, 0),  # fim da reta horizontal
-    (3, 2),  # meio da descida
-    (3, 4),  # fim da descida
-    (5, 4),  # curva para a direita
-    (5, 6),  # fim da reta à direita
+    (5, 4),  # meio da descida
+    (5, 6),  # fim da descida
+    (4, 7),  # curva para a direita
+    (2, 7),  # fim da reta à direita
+    (1, 5),  # fim da reta à direita
+    (0, 2),  # fim da reta à direita
 ]
 
 # Converte posições de grid para coordenadas absolutas (centro do tile)
