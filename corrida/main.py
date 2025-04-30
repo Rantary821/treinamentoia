@@ -131,7 +131,10 @@ while rodando:
 
             # Desenha HUD com geração e tempo
             texto1 = font.render(f"Geração: {pop.geracao}", True, (255, 255, 255))
-            texto2 = font.render(f"Tempo: {tempo_segundos}s", True, (255, 255, 0))
+            minutos = tempo_segundos // 60
+            segundos = tempo_segundos % 60
+            tempo_formatado = f"{minutos:02d}:{segundos:02d}"  # ex: 03:47
+            texto2 = font.render(f"Tempo: {tempo_formatado}", True, (255, 255, 0))
             screen.blit(texto1, (20, 70))
             screen.blit(texto2, (20, 100))
             total = len(pop.individuos)

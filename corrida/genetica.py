@@ -23,7 +23,7 @@ class Individuo:
 
         return filho
 
-    def mutar(self, taxa=0.07):
+    def mutar(self, taxa=0.2):
         for i in range(len(self.rede.w_ih)):
             for j in range(len(self.rede.w_ih[i])):
                 if random.random() < taxa:

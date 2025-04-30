@@ -133,7 +133,7 @@ class CarroIA(Carro):
         self.individuo.fitness = (
             bonus_checkpoints +
             self.distancia_percorrida +
-            self.tempo_vivo * 0.2
+            self.tempo_vivo * 0.3
         )
         if self.morreu_por_colisao:
             self.individuo.fitness *= 0.9  # penaliza fortemente (ou até 0)
