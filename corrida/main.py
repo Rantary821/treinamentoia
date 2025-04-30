@@ -68,7 +68,7 @@ while rodando:
         camera_offset_x = int(carro_manual.x - r.WIDTH // 2)
         camera_offset_y = int(carro_manual.y - r.HEIGHT // 2)
 
-        r.desenhar_pista(pista, camera_offset_x, camera_offset_y)
+        screen.blit(r.get_colisao_surface(), (-camera_offset_x, -camera_offset_y))
         carro_manual.desenhar(screen, camera_offset_x, camera_offset_y)
 
 
@@ -90,7 +90,7 @@ while rodando:
             camera_offset_x = 0
             camera_offset_y = 0
 
-        r.desenhar_pista(pista, camera_offset_x, camera_offset_y)
+        screen.blit(r.get_colisao_surface(), (-camera_offset_x, -camera_offset_y))
 
         for carro in carros:
             if carro.vivo:
@@ -173,10 +173,12 @@ while rodando:
              pista_atual = 0
              r.surface_colisao = r.gerar_surface_mapa(r.pistas[pista_atual])
              r.matriz_logica = r.gerar_matriz_logica(r.pistas[pista_atual])
+             r.atualizar_surface_colisao(pista_atual)  # <== GARANTIR ISSO
             elif event.key == pygame.K_2:
                 pista_atual = 1
                 r.surface_colisao = r.gerar_surface_mapa(r.pistas[pista_atual])
                 r.matriz_logica = r.gerar_matriz_logica(r.pistas[pista_atual])
+                r.atualizar_surface_colisao(pista_atual)
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if botao_rect.collidepoint(event.pos):
                 usar_carro_manual = not usar_carro_manual
