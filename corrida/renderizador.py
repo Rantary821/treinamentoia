@@ -86,12 +86,15 @@ def get_colisao_surface():
     return colisao_surface
 
 # Checkpoints (opcional)
-CHECKPOINTS_GRID = [
+CHECKPOINTS_GRID_1= [
     (3, 0), (4, 4), (5, 6), (4, 7), (2, 7), (1, 5), (0, 2)
 ]
+CHECKPOINTS_GRID_2= [
+    (3, 0), (11, 0), (11, 2), (6, 1), (6, 6), (11, 6), (1, 5), (0, 2)
+]
 
-def gerar_checkpoints_pixel():
-    return [(x * TILE_SIZE + TILE_SIZE // 2, y * TILE_SIZE + TILE_SIZE // 2) for x, y in CHECKPOINTS_GRID]
+def gerar_checkpoints_pixel(grid):
+    return [(x * TILE_SIZE + TILE_SIZE // 2, y * TILE_SIZE + TILE_SIZE // 2) for x, y in grid]
 
 # Inicializa a surface de colisão na primeira execução
 atualizar_surface_colisao(pista_atual)

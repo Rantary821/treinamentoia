@@ -1,10 +1,11 @@
 import pygame
+import random
 import math
 import renderizador as r
 from carro import Carro
 from carro_ia import CarroIA, CHECKPOINTS
 from genetica import Populacao
-from renderizador import CHECKPOINTS_GRID, TILE_SIZE
+from renderizador import CHECKPOINTS_GRID_1, CHECKPOINTS_GRID_2, TILE_SIZE
 #import matplotlib.pyplot as plt
 #import matplotlib.animation as animation
 
@@ -20,8 +21,8 @@ clock = pygame.time.Clock()
 # Estado do jogo
 pista_atual = 0
 surface_colisao = r.gerar_surface_mapa(r.pistas[pista_atual])
-pop = Populacao(tamanho=50)
-carros = [CarroIA(50, 50, ind) for ind in pop.individuos]
+pop = Populacao(tamanho=100)
+carros = [CarroIA(50, 50, ind, CHECKPOINTS) for ind in pop.individuos]
 for carro in carros:
     carro.angle = -90  # apontando para a direita, por exemplo
 carro_manual = Carro(50, 50)
@@ -101,7 +102,7 @@ while rodando:
                 vivos += 1
 
             carro.desenhar(screen, camera_offset_x, camera_offset_y)
-
+        if carro == 0:
             for origem, destino in carro.calcular_sensores(surface_colisao):
                 origem_tela = (origem[0] - camera_offset_x, origem[1] - camera_offset_y)
                 destino_tela = (destino[0] - camera_offset_x, destino[1] - camera_offset_y)
@@ -110,7 +111,22 @@ while rodando:
 
         if vivos == 0:
             pop.evoluir()
-            carros = [CarroIA(50, 50, ind) for ind in pop.individuos]
+
+                      # 🗺️ Sorteia novo mapa com 50% de chance
+            if random.random() < 0.5:
+                pista_atual = 0
+                CHECKPOINTS = r.gerar_checkpoints_pixel(r.CHECKPOINTS_GRID_1)
+                print ("pista atual:", pista_atual)
+                pista = r.pistas[pista_atual]
+                surface_colisao = r.gerar_surface_mapa(pista)
+            else:
+                pista_atual = 1
+                pista = r.pistas[pista_atual]
+                surface_colisao = r.gerar_surface_mapa(pista)
+                CHECKPOINTS = r.gerar_checkpoints_pixel(r.CHECKPOINTS_GRID_2)
+                print ("pista atual: ", pista_atual)
+            r.atualizar_surface_colisao(pista_atual)
+            carros = [CarroIA(50, 50, ind, CHECKPOINTS) for ind in pop.individuos]
             for carro in carros:
                 carro.angle = -90  # apontando para a direita, por exemplo
             melhor_fitness = max(ind.fitness for ind in pop.individuos)
@@ -118,10 +134,10 @@ while rodando:
             historico_melhor.append(melhor_fitness)
             historico_media.append(media_fitness)
 
-
+    checkpoints_grid = CHECKPOINTS_GRID_1 if pista_atual == 0 else CHECKPOINTS_GRID_2
       # Desenha checkpoints (modo IA)
     if not usar_carro_manual:
-        for col, lin in CHECKPOINTS_GRID:
+        for col, lin in checkpoints_grid:
             cx = col * TILE_SIZE + TILE_SIZE // 2
             cy = lin * TILE_SIZE + TILE_SIZE // 2
             pygame.draw.circle(screen, (0, 200, 255), (cx - camera_offset_x, cy - camera_offset_y), 10)
@@ -190,7 +206,7 @@ while rodando:
                 carro_manual = Carro(50, 50)
             elif botao_reiniciar_rect.collidepoint(event.pos):
                 pop.evoluir()
-                carros = [CarroIA(50, 50, ind) for ind in pop.individuos]
+                carros = [CarroIA(50, 50, ind, CHECKPOINTS) for ind in pop.individuos]
                 for carro in carros:
                     carro.angle = -90  # ou qualquer direção inicial desejada
 

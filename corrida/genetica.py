@@ -23,15 +23,22 @@ class Individuo:
 
         return filho
 
-    def mutar(self, taxa=0.2):
+    def mutar(self, taxa=0.25, mutacao_agressiva=0.09):
         for i in range(len(self.rede.w_ih)):
             for j in range(len(self.rede.w_ih[i])):
                 if random.random() < taxa:
-                    self.rede.w_ih[i][j] += random.uniform(-1, 1)
+                    if random.random() < mutacao_agressiva:
+                        self.rede.w_ih[i][j] = random.uniform(-1, 1)  # sobrescreve o peso
+                    else:
+                        self.rede.w_ih[i][j] += random.gauss(0, 0.7)  # perturbação com gauss
+
         for i in range(len(self.rede.w_ho)):
             for j in range(len(self.rede.w_ho[i])):
                 if random.random() < taxa:
-                    self.rede.w_ho[i][j] += random.uniform(-1, 1)
+                    if random.random() < mutacao_agressiva:
+                        self.rede.w_ho[i][j] = random.uniform(-1, 1)
+                    else:
+                        self.rede.w_ho[i][j] += random.gauss(0, 0.5)
 
 from copy import deepcopy
 
@@ -45,7 +52,7 @@ class Populacao:
         try:
             with open("melhor_agente.pkl", "rb") as f:
                 melhor = pickle.load(f)
-                print("🔁 Melhor agente carregado com sucesso.")
+                print("Melhor agente carregado com sucesso.")
 
                 # Clonar o melhor e gerar mutações dele
                 self.individuos = [melhor]
@@ -66,6 +73,8 @@ class Populacao:
     def evoluir(self):
         self.individuos.sort(key=lambda ind: ind.fitness, reverse=True)
         self.salvar_melhor()
+        for ind in self.individuos:
+            ind.fitness = 0
         
         # Histórico de fitness
         max_fit = self.individuos[0].fitness
@@ -80,5 +89,5 @@ class Populacao:
             filho = pai.cruzar(mae)
             filho.mutar()
             novos.append(filho)
-            self.individuos = sobreviventes + novos
+        self.individuos = sobreviventes + novos
         self.geracao += 1

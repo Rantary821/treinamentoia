@@ -2,28 +2,26 @@ from carro import Carro
 import math
 import pygame
 
-CHECKPOINTS_GRID = [
-    #(1, 0),  # início da reta
-    (3, 0),  # fim da reta horizontal
-    (4, 4),  # meio da descida
-    (5, 6),  # fim da descida
-    (4, 7),  # curva para a direita
-    (2, 7),  # fim da reta à direita
-    (1, 5),  # fim da reta à direita
-    (0, 2),  # fim da reta à direita
+# Checkpoints (opcional)
+CHECKPOINTS_GRID_1= [
+    (3, 0), (4, 4), (5, 6), (4, 7), (2, 7), (1, 5), (0, 2)
+]
+CHECKPOINTS_GRID_2= [
+    (3, 0), (11, 0), (11, 2), (6, 1), (6, 6), (11, 6), (1, 5), (0, 2)
 ]
 
 TILE_SIZE = 100
 
 def gerar_checkpoints_pixel():
-    return [(col * TILE_SIZE + TILE_SIZE // 2, lin * TILE_SIZE + TILE_SIZE // 2) for col, lin in CHECKPOINTS_GRID]
+    return [(col * TILE_SIZE + TILE_SIZE // 2, lin * TILE_SIZE + TILE_SIZE // 2) for col, lin in CHECKPOINTS_GRID_1]
 
 CHECKPOINTS = gerar_checkpoints_pixel()
 
 class CarroIA(Carro):
-    def __init__(self, x, y, individuo):
+    def __init__(self, x, y, individuo, checkpoints):
         super().__init__(x, y)
         self.individuo = individuo
+        self.checkpoints = checkpoints
         self.vivo = True
         self.tempo_vivo = 0
         self.distancia_percorrida = 0
@@ -41,10 +39,11 @@ class CarroIA(Carro):
         self.frames_desde_ultimo_checkpoint += 1
 
         # Penaliza se passar muito tempo sem alcançar checkpoint
-        #if self.frames_desde_ultimo_checkpoint > 300:  # por exemplo: 5 segundos sem progresso
-         #   self.vivo = False
-          #  self.atualizar_fitness()
-           # return
+        if self.frames_desde_ultimo_checkpoint > 600:  # por exemplo: 5 segundos sem progresso
+            self.vivo = False
+            self.individuo.fitness *= 0.3
+            self.atualizar_fitness()
+            return
 
         sensores = self.calcular_sensores(matriz_logica)
 
@@ -55,14 +54,16 @@ class CarroIA(Carro):
 
         saida = self.individuo.avaliar(entradas)
 
-        if saida[0] > 0.5:
-            self.angle += 3
-        if saida[1] > 0.5:
-            self.angle -= 3
-        if saida[2] > 0.5:
-            self.velocidade = min(6.5, self.velocidade + 0.4)
-        if saida[3] > 0.5:
-            self.velocidade = max(-3.0, self.velocidade - 0.4)
+        comando = saida.index(max(saida))
+
+        if comando == 0:
+            self.angle += 3  # virar esquerda
+        elif comando == 1:
+            self.angle -= 3  # virar direita
+        elif comando == 2:
+            self.velocidade = min(6.5, self.velocidade + 0.4)  # acelerar
+        elif comando == 3:
+            self.velocidade = max(-3.0, self.velocidade - 0.4)  # ré
 
         self.velocidade *= 0.95
         rad = math.radians(self.angle)
@@ -92,7 +93,7 @@ class CarroIA(Carro):
             self.atualizar_fitness()
 
     def verificar_checkpoint(self):
-        if self.checkpoint_index >= len(CHECKPOINTS):
+        if self.checkpoint_index >= len(self.checkpoints):
             return
 
         # Verificação se está tentando voltar para checkpoint anterior
@@ -101,7 +102,7 @@ class CarroIA(Carro):
             dist_volta = math.hypot(self.x - cx_ant, self.y - cy_ant)
             if dist_volta < 50:
                 self.vivo = False
-                self.individuo.fitness *= 0  # penalidade se ele voltar o checkpoint
+                self.individuo.fitness = 0  # penalidade se ele voltar o checkpoint
                 return
         cx, cy = CHECKPOINTS[self.checkpoint_index]
         dist = math.hypot(self.x - cx, self.y - cy)
@@ -128,12 +129,12 @@ class CarroIA(Carro):
             self.atualizar_fitness()
 
     def atualizar_fitness(self):
-        bonus_checkpoints = sum((i + 1) * 1000 for i in range(self.checkpoints_atingidos))
+        bonus_checkpoints = sum((i + 1) * 2000 for i in range(self.checkpoints_atingidos))
 
         self.individuo.fitness = (
             bonus_checkpoints +
             self.distancia_percorrida +
-            self.tempo_vivo * 0.3
+            self.tempo_vivo * 0.05
         )
         if self.morreu_por_colisao:
-            self.individuo.fitness *= 0.9  # penaliza fortemente (ou até 0)
+            self.individuo.fitness *= 0.5  # penaliza fortemente (ou até 0)
