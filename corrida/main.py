@@ -5,6 +5,8 @@ from carro import Carro
 from carro_ia import CarroIA, CHECKPOINTS
 from genetica import Populacao
 from renderizador import CHECKPOINTS_GRID, TILE_SIZE
+import matplotlib.pyplot as plt
+import matplotlib.animation as animation
 
 import time
 font = pygame.font.SysFont("Arial", 24)
@@ -44,6 +46,9 @@ def desenhar_botao_reiniciar():
     txt = font.render("REINICIAR", True, (255, 255, 255))
     screen.blit(txt, (rect.x + 20, rect.y + 10))
     return rect
+
+historico_melhor = []
+historico_media = []
 rodando = True
 while rodando:
     dt = clock.tick(60) / 1000.0
@@ -64,8 +69,7 @@ while rodando:
         r.desenhar_pista(pista, camera_offset_x, camera_offset_y)
         carro_manual.desenhar(screen, camera_offset_x, camera_offset_y)
 
-        botao_rect = desenhar_botao()
-        botao_reiniciar_rect = desenhar_botao_reiniciar()
+
 
         for origem, destino in carro_manual.calcular_sensores(matriz_logica):
             origem_tela = (origem[0] - camera_offset_x, origem[1] - camera_offset_y)
@@ -105,8 +109,12 @@ while rodando:
             carros = [CarroIA(50, 50, ind) for ind in pop.individuos]
             for carro in carros:
                 carro.angle = -90  # apontando para a direita, por exemplo
+            melhor_fitness = max(ind.fitness for ind in pop.individuos)
+            media_fitness = sum(ind.fitness for ind in pop.individuos) / len(pop.individuos)
+            historico_melhor.append(melhor_fitness)
+            historico_media.append(media_fitness)
 
-    botao_rect = desenhar_botao()
+
       # Desenha checkpoints (modo IA)
     if not usar_carro_manual:
         for col, lin in CHECKPOINTS_GRID:
@@ -130,18 +138,34 @@ while rodando:
 
             screen.blit(texto3, (20, 130))
             screen.blit(texto4, (20, 160))
-            botao_rect = desenhar_botao()
-            botao_reiniciar_rect = desenhar_botao_reiniciar()
+    botao_rect = desenhar_botao()
+    botao_reiniciar_rect = desenhar_botao_reiniciar()
     pygame.display.flip()
+
+    
+    fig, ax = plt.subplots()
+    linha_melhor, = ax.plot([], [], label="Melhor")
+    linha_media, = ax.plot([], [], label="Média")
+    ax.set_title("Desempenho por Geração")
+    ax.set_xlabel("Geração")
+    ax.set_ylabel("Fitness")
+    ax.legend()
+
+    def atualizar_grafico(frame):
+        linha_melhor.set_data(range(len(historico_melhor)), historico_melhor)
+        linha_media.set_data(range(len(historico_media)), historico_media)
+        ax.relim()
+        ax.autoscale_view()
+        return linha_melhor, linha_media
+    
+
+    ani = animation.FuncAnimation(fig, atualizar_grafico, interval=1000)
+    plt.show(block=False)
 
 
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
             rodando = False
-        elif event.type == pygame.MOUSEBUTTONDOWN:
-            if botao_rect.collidepoint(event.pos):
-                usar_carro_manual = not usar_carro_manual
-                carro_manual = Carro(100, 100)
         elif event.type == pygame.KEYDOWN:
             if event.key == pygame.K_1:
                 pista_atual = 0
@@ -150,9 +174,11 @@ while rodando:
         elif event.type == pygame.MOUSEBUTTONDOWN:
             if botao_rect.collidepoint(event.pos):
                 usar_carro_manual = not usar_carro_manual
-                carro_manual = Carro(100, 100)
+                carro_manual = Carro(50, 50)
             elif botao_reiniciar_rect.collidepoint(event.pos):
                 pop.evoluir()
-                carros = [CarroIA(100, 100, ind) for ind in pop.individuos]
+                carros = [CarroIA(50, 50, ind) for ind in pop.individuos]
+                for carro in carros:
+                    carro.angle = -90  # ou qualquer direção inicial desejada
 
 pygame.quit()

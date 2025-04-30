@@ -23,7 +23,7 @@ class Individuo:
 
         return filho
 
-    def mutar(self, taxa=0.1):
+    def mutar(self, taxa=0.07):
         for i in range(len(self.rede.w_ih)):
             for j in range(len(self.rede.w_ih[i])):
                 if random.random() < taxa:
@@ -39,6 +39,8 @@ class Populacao:
     def __init__(self, tamanho=50):
         self.geracao = 0
         self.tamanho = tamanho
+        self.historico_fitness_max = []
+        self.historico_fitness_medio = []
 
         try:
             with open("melhor_agente.pkl", "rb") as f:
@@ -64,8 +66,13 @@ class Populacao:
     def evoluir(self):
         self.individuos.sort(key=lambda ind: ind.fitness, reverse=True)
         self.salvar_melhor()
+        
+        # Histórico de fitness
+        max_fit = self.individuos[0].fitness
+        avg_fit = sum(ind.fitness for ind in self.individuos) / len(self.individuos)
+        self.historico_fitness_max.append(max_fit)
+        self.historico_fitness_medio.append(avg_fit)
         sobreviventes = self.individuos[:10]
-
         novos = []
         while len(novos) < self.tamanho - len(sobreviventes):
             pai = random.choice(sobreviventes)
@@ -73,6 +80,5 @@ class Populacao:
             filho = pai.cruzar(mae)
             filho.mutar()
             novos.append(filho)
-
-        self.individuos = sobreviventes + novos
+            self.individuos = sobreviventes + novos
         self.geracao += 1
