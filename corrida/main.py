@@ -102,6 +102,7 @@ while rodando:
                 vivos += 1
 
             carro.desenhar(screen, camera_offset_x, camera_offset_y)
+            #arrumar essa parte para mostrar os sensores de um unico carro
         if carro == 0:
             for origem, destino in carro.calcular_sensores(surface_colisao):
                 origem_tela = (origem[0] - camera_offset_x, origem[1] - camera_offset_y)

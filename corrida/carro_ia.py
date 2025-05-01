@@ -4,7 +4,7 @@ import pygame
 
 # Checkpoints (opcional)
 CHECKPOINTS_GRID_1= [
-    (3, 0), (4, 4), (5, 6), (4, 7), (2, 7), (1, 5), (0, 2)
+    (3, 0), (3, 4),(4, 4),(5, 4), (5, 6), (4, 7), (2, 7), (1, 5), (0, 2)
 ]
 CHECKPOINTS_GRID_2= [
     (3, 0), (11, 0), (11, 2), (6, 1), (6, 6), (11, 6), (1, 5), (0, 2)
@@ -39,9 +39,9 @@ class CarroIA(Carro):
         self.frames_desde_ultimo_checkpoint += 1
 
         # Penaliza se passar muito tempo sem alcançar checkpoint
-        if self.frames_desde_ultimo_checkpoint > 600:  # por exemplo: 5 segundos sem progresso
+        if self.frames_desde_ultimo_checkpoint > 300:  # por exemplo: 5 segundos sem progresso
             self.vivo = False
-            self.individuo.fitness *= 0.3
+            self.individuo.fitness = 0
             self.atualizar_fitness()
             return
 

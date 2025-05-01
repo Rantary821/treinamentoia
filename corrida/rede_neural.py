@@ -6,7 +6,7 @@ def sigmoid(x):
     return 1 / (1 + math.exp(-x))
 
 class RedeNeural:
-    def __init__(self, n_input = 20, n_hidden = 15, n_output = 4):
+    def __init__(self, n_input = 20, n_hidden = 50, n_output = 4):
         self.n_input = n_input
         self.n_hidden = n_hidden
         self.n_output = n_output

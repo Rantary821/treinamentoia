@@ -23,7 +23,7 @@ class Individuo:
 
         return filho
 
-    def mutar(self, taxa=0.25, mutacao_agressiva=0.09):
+    def mutar(self, taxa=0.4, mutacao_agressiva=0.15):
         for i in range(len(self.rede.w_ih)):
             for j in range(len(self.rede.w_ih[i])):
                 if random.random() < taxa:
@@ -58,7 +58,7 @@ class Populacao:
                 self.individuos = [melhor]
                 for _ in range(tamanho - 1):
                     clone = deepcopy(melhor)
-                    clone.mutar(taxa=0.1)
+                    clone.mutar(taxa=0.2)
                     self.individuos.append(clone)
 
         except:
